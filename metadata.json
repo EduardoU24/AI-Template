@@ -1,0 +1,5 @@
+{
+  "name": "OpenDND Framework Template",
+  "description": "A master template for scalable React applications featuring mock APIs, Next.js-inspired routing, admin dashboards, and debug tools. Developed by OpenDND.",
+  "requestFramePermissions": []
+}
