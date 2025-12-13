@@ -12,6 +12,7 @@ import LoginPage from './app/(auth)/login/page';
 import AdminLayout from './app/(admin)/layout';
 import DashboardPage from './app/(admin)/dashboard/page';
 import UsersPage from './app/(admin)/dashboard/users/page';
+import SettingsPage from './app/(admin)/dashboard/settings/page';
 
 const App: React.FC = () => {
   const [debugConfig, setDebugConfig] = useState<DebugConfig>({
@@ -45,6 +46,7 @@ const App: React.FC = () => {
           }>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/dashboard/users" element={<UsersPage />} />
+            <Route path="/dashboard/settings" element={<SettingsPage />} />
           </Route>
 
           {/* Fallback */}
