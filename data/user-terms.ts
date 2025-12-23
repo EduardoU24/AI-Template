@@ -1,4 +1,3 @@
-import { createUserScopedService } from './service';
 
 export enum UserTermFlags {
   None = 0,
@@ -49,5 +48,3 @@ export const DATA: UserTermAcceptance[] = [
     flags: UserTermFlags.WasRead,
   },
 ];
-
-export const UserTermService = createUserScopedService<UserTermAcceptance>('userTerms');

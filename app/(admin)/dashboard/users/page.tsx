@@ -4,8 +4,8 @@ import { Edit2, Trash2, Plus, User as UserIcon, Check, X, Shield, ShieldAlert } 
 import { Button } from '../../../ui/button';
 import { Card } from '../../../ui/card';
 import { Badge } from '../../../ui/badge';
-import { UserService } from '../../../../data/_mockup.service';
-import { IUserExtended, UserRoleType, UserStatusFlags } from '../../../../data/users';
+import { UserService } from '@/service/users';
+import { IUserExtended, UserRoleType, UserStatusFlags } from '@/data/users';
 
 export default function UsersPage() {
   const [users, setUsers] = useState<IUserExtended[]>([]);

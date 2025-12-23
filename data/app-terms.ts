@@ -1,5 +1,3 @@
-import { createService } from './service'
-
 export type TermType = 'terms_of_service' | 'privacy_policy' | 'cookie_policy' | 'eula';
 
 export enum AppTermFlags {
@@ -56,13 +54,3 @@ export const DATA: IAppTerm[] = [
     flags: AppTermFlags.IsActive
   }
 ];
-
-export const AppTermService = {
-  ...createService<IAppTerm>('terms'),
-  getLatestByType: async (type: TermType) => {
-    const res = await createService<IAppTerm>('terms').findAll();
-    const matches = (res.data || []).filter(t => t.type === type && (t.flags & AppTermFlags.IsActive) !== 0);
-    const sorted = matches.sort((a, b) => b.version.localeCompare(a.version));
-    return { ...res, data: sorted[0] || null };
-  }
-};

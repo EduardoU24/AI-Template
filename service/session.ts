@@ -1,22 +1,22 @@
 /**
- * Mock Session Manager
+ * Session Manager
  * Simulates a server-side session or a client-side auth context
  * to allow services to infer "current user".
  */
 
-export const MockSession = {
+export const SessionManager = {
   // Default to the first user (Alice Admin) for development convenience
   currentUserId: 'u_1',
 
   getSession: () => {
-    return MockSession.currentUserId;
+    return SessionManager.currentUserId;
   },
 
   setSession: (userId: string) => {
-    MockSession.currentUserId = userId;
+    SessionManager.currentUserId = userId;
   },
 
   clearSession: () => {
-    MockSession.currentUserId = '';
+    SessionManager.currentUserId = '';
   }
 };

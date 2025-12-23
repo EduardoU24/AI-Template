@@ -1,4 +1,3 @@
-import { createUserScopedService } from './service';
 
 // User Relation Types
 export interface UserNotificationRecord {
@@ -28,19 +27,3 @@ export const DATA: UserNotificationRecord[] = [
     updatedAt: '2024-03-11T09:00:00Z',
   }
 ];
-
-export const UserNotificationService = {
-  ...createUserScopedService<UserNotificationRecord>('notifications'),
-  getUnreadCount: async () => {
-    const service = createUserScopedService<UserNotificationRecord>('notifications');
-    const myNotes = await service.findAllMy({ delay: 0 });
-    return (myNotes.data || []).filter(n => !n.isRead).length;
-  },
-  markAllAsRead: async () => {
-    const service = createUserScopedService<UserNotificationRecord>('notifications');
-    const myNotes = await service.findAllMy({ delay: 0 });
-    for (const n of (myNotes.data || [])) {
-      if (!n.isRead) await service.updateMy(n.id, { isRead: true }, { delay: 0 });
-    }
-  }
-};

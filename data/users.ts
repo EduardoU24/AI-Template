@@ -75,11 +75,3 @@ export const DATA: IUserExtended[] = [
     preferences: UserPreferencesFlags.None
   },
 ];
-
-import { createService } from './service/index.ts';
-import { MockSession } from './_mockup.session.ts';
-
-export const UserService = {
-  ...createService<IUserExtended>('users'),
-  getMe: () => createService<IUserExtended>('users').findOne(MockSession.getSession())
-};

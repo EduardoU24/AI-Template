@@ -8,7 +8,7 @@ export enum AppRouteFlags {
   IsAdmin = 1 << 4
 }
 
-export interface AppRoute {
+export interface IAppRoute {
   id: string;
   path: string;
   componentKey: 'Landing' | 'Dashboard' | 'Login';
@@ -19,11 +19,7 @@ export interface AppRoute {
   updatedAt: string;
 }
 
-/**
- * RAW DATA Definition must come BEFORE imports that trigger the service chain
- * to avoid Temporal Dead Zone (TDZ) ReferenceErrors.
- */
-export const DATA: AppRoute[] = [
+export const DATA: IAppRoute[] = [
   {
     id: 'route_home',
     path: '/',
@@ -93,6 +89,3 @@ export const DATA: AppRoute[] = [
     updatedAt: '2023-01-01T00:00:00Z'
   }
 ];
-
-import { createService } from './service/index.ts';
-export const AppRouteService = createService<AppRoute>('routes');

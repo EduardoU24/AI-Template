@@ -3,7 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DebugMenu } from './ui/debug-menu.tsx';
 import { IDebugConfig } from '../data/_types.ts';
 import { AppRouteFlags } from '../data/app-routes.ts';
-import { MockSession } from '../data/_mockup.session.ts';
+import { SessionManager } from '../service/session';
 import { NotificationProvider } from './ui/notification-center.tsx';
 
 // Layouts & Pages
@@ -65,7 +65,7 @@ const App: React.FC = () => {
 
 // Route Guard Component
 const RouteGuard: React.FC<{ children: React.ReactNode, flags: number }> = ({ children, flags }) => {
-  const isAuthenticated = !!MockSession.getSession();
+  const isAuthenticated = !!SessionManager.getSession();
 
   if ((flags & AppRouteFlags.GuestOnly) !== 0 && isAuthenticated) {
     return <Navigate to="/dashboard" replace />;

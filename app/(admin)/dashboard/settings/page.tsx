@@ -1,19 +1,17 @@
+
 import React, { useEffect, useState } from 'react';
 import { Save, RefreshCw, AlertTriangle, Globe, Lock } from 'lucide-react';
-import { Button } from '../../../ui/button';
-import { Card } from '../../../ui/card';
-import { Input } from '../../../ui/input';
-import { AppConfigService } from '../../../../data/_mockup.service';
-// Fix: Using correct interface name IAppConfig as exported from data/app-configs.ts
-import { IAppConfig, AppConfigFlags } from '../../../../data/app-configs';
+import { Button } from '../../../ui/button.tsx';
+import { Card } from '../../../ui/card.tsx';
+import { Input } from '../../../ui/input.tsx';
+import { AppConfigService } from '../../../../service/app-configs.ts';
+import { IAppConfig, AppConfigFlags } from '../../../../data/app-configs.ts';
 
 export default function SettingsPage() {
-  // Fix: Using correct interface name IAppConfig
   const [config, setConfig] = useState<IAppConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  // Local state for form inputs to avoid direct mutation of config object
   const [formState, setFormState] = useState({
     seoTitle: '',
     seoDesc: '',
@@ -23,7 +21,6 @@ export default function SettingsPage() {
 
   const fetchConfig = async () => {
     setLoading(true);
-    // Fetch the 'global' config
     const res = await AppConfigService.getByKey('global');
     if (res.data) {
       setConfig(res.data);
@@ -45,12 +42,10 @@ export default function SettingsPage() {
     if (!config) return;
     setSaving(true);
 
-    // Reconstruct flags based on checkboxes
     let newFlags = AppConfigFlags.None;
     if (formState.isPublic) newFlags |= AppConfigFlags.IsPublic;
     if (formState.inMaintenance) newFlags |= AppConfigFlags.InMaintenance;
 
-    // Fix: Using correct interface name IAppConfig for Partial type
     const updates: Partial<IAppConfig> = {
       baseSeo: {
         ...config.baseSeo,
@@ -61,8 +56,6 @@ export default function SettingsPage() {
     };
 
     await AppConfigService.update(config.id, updates);
-    
-    // Refresh to verify
     await fetchConfig();
     setSaving(false);
   };
@@ -76,17 +69,15 @@ export default function SettingsPage() {
            <h1 className="text-2xl font-bold text-white">Global Settings</h1>
            <p className="text-slate-400 text-sm">Manage application defaults and global flags.</p>
         </div>
-        <Button onClick={fetchConfig} variant="ghost">
+        <Button onClick={fetchConfig} variant="secondary">
           <RefreshCw className="w-4 h-4 mr-2" /> Reset
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Main Config Column */}
         <div className="md:col-span-2 space-y-6">
           <Card>
-            <div className="flex items-center gap-2 mb-6 text-brand-400">
+            <div className="flex items-center gap-2 mb-6 text-brand-500">
               <Globe className="w-5 h-5" />
               <h2 className="text-lg font-semibold text-white">General & SEO</h2>
             </div>
@@ -110,7 +101,7 @@ export default function SettingsPage() {
           </Card>
 
           <Card>
-            <div className="flex items-center gap-2 mb-6 text-yellow-400">
+            <div className="flex items-center gap-2 mb-6 text-yellow-500">
               <AlertTriangle className="w-5 h-5" />
               <h2 className="text-lg font-semibold text-white">Danger Zone</h2>
             </div>
@@ -135,7 +126,6 @@ export default function SettingsPage() {
           </Card>
         </div>
 
-        {/* Sidebar / Actions */}
         <div className="space-y-6">
            <Card>
               <h3 className="font-semibold text-white mb-4">Publishing</h3>
