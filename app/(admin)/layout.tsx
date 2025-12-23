@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Activity, Search, Bell, Menu, Plus, 
-  BarChart3, Users, DollarSign, BrainCircuit, LayoutDashboard, Settings
+  BarChart3, Users, DollarSign, BrainCircuit, LayoutDashboard, Settings, Briefcase
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { DATA as APP_ROUTES, AppRouteFlags } from '../../data/app-routes';
@@ -13,7 +13,8 @@ const ICON_MAP: Record<string, any> = {
   'DollarSign': DollarSign,
   'BrainCircuit': BrainCircuit,
   'BarChart3': BarChart3,
-  'Settings': Settings
+  'Settings': Settings,
+  'Briefcase': Briefcase
 };
 
 export default function AdminLayout() {
@@ -30,15 +31,14 @@ export default function AdminLayout() {
         <div className="h-16 flex items-center px-6 border-b border-slate-800">
           <div className="flex items-center gap-3 text-brand-500">
             <Activity className="w-6 h-6" />
-            {isSidebarOpen && <span className="font-bold text-white tracking-wide">Admin</span>}
+            {isSidebarOpen && <span className="font-bold text-white tracking-wide uppercase text-xs">OpenDND Framework</span>}
           </div>
         </div>
         
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {sidebarLinks.map((item) => {
             const Icon = item.icon ? ICON_MAP[item.icon] : BarChart3;
-            // Simple match for active state, allowing sub-routes
-            const isActive = location.pathname.startsWith(item.path);
+            const isActive = location.pathname === item.path;
             
             return (
               <Link 
@@ -51,7 +51,7 @@ export default function AdminLayout() {
                 }`}
               >
                 <Icon className="w-5 h-5 min-w-[20px]" />
-                {isSidebarOpen && <span>{item.label}</span>}
+                {isSidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
               </Link>
             );
           })}
@@ -64,8 +64,8 @@ export default function AdminLayout() {
             </div>
             {isSidebarOpen && (
               <div className="text-left">
-                <div className="text-sm font-medium text-white">Admin User</div>
-                <div className="text-xs">Log Out</div>
+                <div className="text-[10px] font-bold text-slate-500 uppercase">Administrator</div>
+                <div className="text-xs text-white">Alice Admin</div>
               </div>
             )}
           </Button>
@@ -83,26 +83,28 @@ export default function AdminLayout() {
             <div className="relative hidden md:block w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input 
-                placeholder="Search resources..." 
-                className="w-full bg-slate-950 border border-slate-800 rounded-full pl-9 pr-4 py-1.5 text-sm text-slate-300 focus:ring-1 focus:ring-brand-500 outline-none"
+                placeholder="Search domain..." 
+                className="w-full bg-slate-950 border border-slate-800 rounded-full pl-9 pr-4 py-1.5 text-xs text-slate-300 focus:ring-1 focus:ring-brand-500 outline-none"
               />
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="primary" className="h-8 text-xs px-3 gap-2">
-              <Plus className="w-3 h-3" /> New Deployment
+            <Button variant="primary" className="h-8 text-[10px] px-3 gap-2">
+              <Plus className="w-3 h-3" /> New Pod
             </Button>
             <div className="w-px h-6 bg-slate-800" />
             <button className="relative text-slate-400 hover:text-white">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+              <span className="absolute top-0 right-0 w-2 h-2 bg-brand-500 rounded-full" />
             </button>
           </div>
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-auto p-6 md:p-8">
-          <Outlet />
+        <div className="flex-1 overflow-auto p-6 md:p-8 bg-slate-950/20">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

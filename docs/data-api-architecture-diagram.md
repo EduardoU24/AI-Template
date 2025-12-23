@@ -1,127 +1,48 @@
 # OpenDND Framework: Architectural Diagrams
 
-This document provides a visual representation of the OpenDND Service-Driven Architecture. Use these diagrams to understand the flow of data and the decoupling of the UI from the backend.
-
----
-
-## 1. High-Level System Overview
-The framework is divided into three distinct layers. Components in the **UI Layer** never touch the **Data Layer** directly; they always communicate via the **Service Layer**.
-
-```mermaid
-graph TD
-    subgraph UI_Layer ["App Layer (React)"]
-        Components["React Components"]
-        Hooks["Custom Hooks"]
-    end
-
-    subgraph Service_Layer ["Logic Layer (Services)"]
-        Registry["Service Registry"]
-        CRUD["CRUD Factory"]
-        DomainLogic["Domain Logic"]
-    end
-
-    subgraph Strategy_Layer ["Provider Layer (Strategy Pattern)"]
-        Memory["MemoryStrategy (Local)"]
-        Strapi["StrapiStrategy (Remote)"]
-    end
-
-    Components --> Registry
-    Registry --> CRUD
-    CRUD --> Memory
-    CRUD --> Strapi
-```
-
----
-
-## 2. The Master Switch: Strategy Swapping
-By modifying `config/service.ts`, the entire application's data backbone is rewired without changing a single line of UI code.
-
-```mermaid
-graph LR
-    Config["config/service.ts"]
-    
-    subgraph App_Core ["Application Core"]
-        Provider["IDataProvider Interface"]
-    end
-    
-    Config -- "activeStrategy: 'memory'" --> MemoryStrategy["MemoryStrategy.ts"]
-    Config -- "activeStrategy: 'strapi'" --> StrapiStrategy["StrapiStrategy.ts"]
-    
-    MemoryStrategy -.-> Provider
-    StrapiStrategy -.-> Provider
-```
-
----
-
-## 3. Bootstrapping & Deferred Seeding
-This diagram explains how the framework handles "Race Conditions" where data is registered before the Provider is ready.
-
-```mermaid
-sequenceDiagram
-    participant D as Data Manifest (data/*.ts)
-    participant P as Provider Registry (service/provider.ts)
-    participant C as Config (config/service.ts)
-    participant S as Strategy (Memory/Strapi)
-
-    Note over D, S: 1. Module Loading Phase
-    D->>P: registerInitialData(collection, items)
-    P->>P: Store in PENDING_SEEDS cache
-
-    Note over D, S: 2. Initialization Phase (index.tsx)
-    C->>P: bootstrapProvider()
-    P->>S: Instantiate Strategy
-    P->>P: setProvider(S)
-    
-    Note over P, S: 3. Seeding Phase
-    P->>S: seed(PENDING_SEEDS)
-    S->>S: Hydrate Local Registry
-```
-
----
-
-## 4. Request Lifecycle: Service.findAll()
-How a single data request moves through the system and returns a standardized `IApiResponse`.
-
-```mermaid
-sequenceDiagram
-    participant UI as Component (page.tsx)
-    participant SRV as Service (UserService.ts)
-    participant PROV as Provider (Memory/Strapi)
-    participant LAT as Latency Simulator
-
-    UI->>SRV: UserService.findAll()
-    SRV->>PROV: getProvider().get('users')
-    PROV->>LAT: wait(mockLatency)
-    LAT-->>PROV: resume
-    PROV-->>SRV: { data: [...], status: 200 }
-    SRV-->>UI: IApiResponse<IUser[]>
-    
-    Note over UI: UI renders data or shows error toast
-```
-
----
-
-## 5. Modular Dependency Graph
-The relationship between files in a feature "pod."
+## 1. Modular Dependency Graph
+The relationship between files in a **Plugin Pod** and their interaction with the core.
 
 ```mermaid
 graph RL
-    subgraph Data ["/data"]
-        T["types.ts"]
-        M["mock-data.ts"]
+    subgraph Plugin_Pod ["/plugins/projects"]
+        Data["data.ts (Types/Seeds)"]
+        Srv["service.ts (Logic)"]
+        UI["ui/ (Co-located Components)"]
+        Idx["index.ts (Public Export)"]
     end
 
-    subgraph Service ["/service"]
-        S["domain-service.ts"]
+    subgraph Core_Services ["/service"]
+        Base["index.ts (CRUD Factory)"]
+        Provider["provider.ts (Strategy Manager)"]
     end
 
-    subgraph App ["/app"]
-        UI["page.tsx"]
+    subgraph App_Router ["/app"]
+        Page["(admin)/dashboard/projects/page.tsx"]
     end
 
-    S -- "Imports Types/Mock" --> Data
-    UI -- "Imports Service" --> Service
-    Data -- "Registered via" --> S
+    Srv -- "Registers Seeds" --> Base
+    Page -- "Consumes" --> Idx
+    Srv -- "Uses" --> Base
+    Base -- "Requests" --> Provider
+```
+
+## 2. Data Flow Architecture
+How a user interaction reaches the data store.
+
+```mermaid
+sequenceDiagram
+    participant UI as App Component (page.tsx)
+    participant Srv as Plugin Service (service.ts)
+    participant Core as Base Service (service/index.ts)
+    participant Prov as Provider (strategy-memory.ts)
+
+    UI->>Srv: ProjectService.findAllMy()
+    Srv->>Core: base.findAll()
+    Core->>Prov: provider.get('projects')
+    Prov-->>Core: { data: [...] }
+    Core-->>Srv: { data: [...] }
+    Srv-->>UI: { data: [User's Projects] }
 ```
 
 ---

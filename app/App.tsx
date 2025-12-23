@@ -14,6 +14,7 @@ import AdminLayout from './(admin)/layout.tsx';
 import DashboardPage from './(admin)/dashboard/page.tsx';
 import UsersPage from './(admin)/dashboard/users/page.tsx';
 import SettingsPage from './(admin)/dashboard/settings/page.tsx';
+import ProjectsPage from './(admin)/dashboard/projects/page.tsx';
 
 const App: React.FC = () => {
   const [debugConfig, setDebugConfig] = useState<IDebugConfig>({
@@ -47,6 +48,7 @@ const App: React.FC = () => {
               </RouteGuard>
             }>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard/projects" element={<ProjectsPage />} />
               <Route path="/dashboard/users" element={<UsersPage />} />
               <Route path="/dashboard/settings" element={<SettingsPage />} />
             </Route>

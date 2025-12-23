@@ -1,104 +1,61 @@
 # OpenDND Framework: Data & Service Architecture
 
-This document serves as the "Long-Term Memory" and architectural manifest for the OpenDND Framework. It defines the standards for data management, service orchestration, and UI interaction.
+This document defines the standards for data management, service orchestration, and logical ownership within the OpenDND environment.
 
-## 1. Core Philosophy: Why this way?
+## 1. Modular Expansion: Plugin Pods
+To avoid monolithic bloat, all domain features are implemented as **Plugins** in `/plugins/[name]`. This mirrors the "Local Package" pattern in enterprise monorepos.
 
-Traditional React applications often suffer from "Prop Drilling" or "Context Bloat," where data fetching is tightly coupled to the UI. The OpenDND Framework solves this through a **Service-Driven Strategy Architecture**.
-
-### The Goals
-- **Backend Agnosticism**: Switch from a Mock/Memory DB to a live Strapi/REST/GraphQL API in seconds.
-- **Developer Speed (DX)**: Start building the UI before the backend even exists.
-- **AI-Ready Logic**: The structured nature of services makes it easy for AI models (like Gemini) to understand and generate new features.
-- **Predictable Side Effects**: All business logic lives in `/service`, never in `page.tsx`.
+### Isolation Rules
+- **Data**: Mock seeds in `data.ts` represent the future database schema.
+- **Service**: Business logic in `service.ts` will eventually become **Server Actions**.
+- **UI**: Feature-specific components live in `ui/`, separated from the core framework.
 
 ---
 
-## 2. Layered Responsibility
+## 2. The Data Tier Hierarchy
 
-### A. The Manifest Layer (`/data`)
-Static definitions. No logic allowed here.
-- **Interfaces**: Define the shape of your domain objects.
-- **Mock Data**: Exported as `DATA` constants to seed the memory strategy.
-- **Enums/Flags**: Use bitwise flags (e.g., `1 << 0`) for complex permissions.
+We partition data into four tiers to facilitate scaling and server-side transition:
 
-### B. The Logic Layer (`/service`)
-The "Brain" of the application.
-- **Provider Strategy**: Implements the `IDataProvider` interface.
-- **Service Factories**: Uses `createService` to generate CRUD methods automatically.
-- **Domain logic**: Custom business rules (e.g., `getUnreadCount()`) are added here.
+### Tier 1: Infrastructure (`app-*.ts`)
+- **Focus**: Global system settings and routing.
+- **SPA Usage**: Central config for navigation and SEO.
+- **Next.js Transition**: Constants used in `layout.tsx` or `middleware.ts`.
 
-### C. The UI Layer (`/app`)
-Purely representational.
-- **Consumption**: Components call `UserService.findAll()` or `UserNotificationService.markAllAsRead()`.
-- **State**: React state or Context is only used for UI-specific flags (isOpen, isLoading).
+### Tier 2: Relational (`user-*.ts`)
+- **Focus**: User-specific records and logs (Join Tables). Always includes `userId`.
+- **SPA Usage**: Tracks specific user interactions (e.g., "User A has read Notification X").
+- **Next.js Transition**: Maps directly to relational DB tables via an ORM (Prisma/Drizzle).
 
----
+### Tier 3: Content (`page-*.ts`)
+- **Focus**: Representational data (The "String Layer").
+- **SPA Usage**: CMS-style content imported directly into page components.
+- **Next.js Transition**: Stays as flat files or migrates to a Headless CMS (Strapi/Sanity).
 
-## 3. The Strategy Pattern & Seeding
-
-We use a **Deferred Seeding Mechanism** to ensure the app never crashes due to initialization race conditions.
-
-### Memory Strategy (Default)
-Ideal for prototyping. It stores data in a local JavaScript registry.
-- **Supports**: Latency simulation, error simulation, and persistent-session seeding.
-
-### Strapi / REST Strategy
-Used for production. It maps collection names directly to REST endpoints.
-- **Convention**: `service/user-posts.ts` -> `api/user-posts`.
-- **Flattening**: Automatically handles Strapi's `{ data: { attributes } }` wrapping to keep UI code clean.
+### Tier 4: Master Entities (`[entity].ts`)
+- **Focus**: Primary system objects (Users, Projects, Products).
+- **SPA Usage**: The "Source of Truth" for system entities.
 
 ---
 
-## 4. Code Etiquette & Best Practices
+## 3. Migration Roadmap to Next.js
 
-1.  **Thou Shalt Not Fetch in Components**: Never use `fetch()` or `axios` inside a `useEffect`. Always call a `Service`.
-2.  **Naming is Destiny**: If your service file is `product-orders.ts`, your collection name **must** be `product-orders`. This ensures REST route compatibility.
-3.  **Isolation via Scoping**: Use `createUserScopedService` for data that belongs to a specific user (filters by `userId` automatically).
-4.  **Immutable Data**: Treat all data returned from services as immutable. Use service methods for updates.
-5.  **Graceful Errors**: Always assume the API might fail. Use the `IApiResponse<T>` wrapper to check for `res.error`.
+The framework is architected such that the transition to Next.js is primarily a "move and replace" operation:
 
----
-
-## 5. Adding a New Domain (The Checklist)
-
-To add a new feature (e.g., "Project Tasks"):
-
-1.  **Define Data**: Create `data/project-tasks.ts` with an interface and `DATA` mock array.
-2.  **Create Service**: Create `service/project-tasks.ts`.
-    ```typescript
-    import { DATA, ITask } from '../data/project-tasks.ts';
-    import { createService, registerInitialData } from './index.ts';
-
-    const COLLECTION = 'project-tasks';
-    registerInitialData(COLLECTION, DATA);
-    export const ProjectTaskService = createService<ITask>(COLLECTION);
-    ```
-3.  **Bootstrap**: Use `ProjectTaskService` in your React components.
+| SPA Feature | Next.js Equivalent | Transition Path |
+| :--- | :--- | :--- |
+| `/app` Folders | `/app` Directory | Direct move. Replace `react-router-dom` with Next.js Link/Router. |
+| `service/*.ts` | Server Actions | Move logic to `'use server'` functions. |
+| `data/user-*.ts`| Database Schema | Convert interfaces to Prisma/Drizzle schemas. |
+| `data/page-*.ts`| CMS / Flat Files | Keep as is or move to a proper CMS. |
+| `service/provider.ts`| DB Adapter | Replace Mock Strategy with a live DB adapter. |
 
 ---
 
-## 6. AI Orchestration (`/lib/ai.ts`)
-
-The framework integrates Gemini AI to provide intelligent insights.
-- **Placement**: AI logic lives in `lib/ai.ts`.
-- **Context Injection**: Services pass data to AI functions to generate context-aware suggestions.
-- **Example Flow**:
-    - Component triggers `StatCard.onGenerateInsight`.
-    - Service provides the current metric value.
-    - `lib/ai.ts` queries Gemini and returns a string.
-    - UI renders the insight with a "Generated by AI" badge.
-
-## 7. Configuration (`/config/service.ts`)
-
-This is the **Master Switch**. Changing `activeStrategy` here re-wires the entire application's data backbone.
-
-```typescript
-export const APP_CONFIG = {
-  activeStrategy: 'memory', // Change to 'strapi' for production
-  strapi: { ... }
-};
-```
+## 4. Logical Ownership Rules
+1. **No raw data in UI**: Always fetch via a Service.
+2. **User Isolation**: Any file prefixed with `user-*` **must** be consumed via a `UserScopedService`.
+3. **Bitwise Logic**: Use bitwise flags for permissions and statuses (e.g., `UserRole.Admin | UserRole.User`).
+4. **Standardized Responses**: Every service method returns a Promise of `IApiResponse<T>`.
 
 ---
-*OpenDND Framework v2.0 - Developed for Scalability and Speed.*
+*OpenDND Framework v2.0 - Decoupled for Migration.*

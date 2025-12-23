@@ -1,131 +1,81 @@
-# Layout & Folder Structure Standards
+# Layout & Folder Structure: Next.js Parity Standard
 
-This document defines the physical file structure and coding etiquette for the OpenDND Framework. We adopt a **Service-Driven architecture** designed for extreme modularity, AI-readiness, and backend-agnosticism.
+This document defines the physical file structure and coding etiquette for the OpenDND Framework. We adopt a **Next.js App Router inspired architecture** to ensure modularity and a seamless migration path to a full Next.js framework.
 
-## 1. Core Philosophy
+## 1. Core Philosophy: The "App Router" Path
 
-1.  **Domain Co-location**: UI components specific to a route live *inside* that route's `ui/` folder.
-2.  **Service Abstraction**: Components **never** import raw data or use `fetch`. They always go through the `/service` layer.
-3.  **Data Purity**: The `/data` folder is a static manifest. It contains types and constants, not functions.
+1.  **Directory-Based Routing**: The folder hierarchy in `/app` directly maps to the URL path.
+2.  **Special File Conventions**: Specific filenames define roles within a route segment.
+3.  **Domain Co-location (Plugin Pods)**: Complex features live in `/plugins/[domain]`, keeping UI, Services, and Data together.
+4.  **Service Abstraction**: Components **never** import raw data; they always go through the `/service` layer.
 
 ---
 
-## 2. Directory Tree
+## 2. Specialized Filenames
+
+To ensure compatibility with Next.js, use these naming conventions within `/app`:
+
+| Filename | Purpose | SPA Behavior (React Router) | Next.js Equivalent |
+| :--- | :--- | :--- | :--- |
+| **`page.tsx`** | Route Entry | The main UI component for the route. | The public entry point. |
+| **`layout.tsx`** | Wrapper | Shared UI (Nav, Sidebar) that persists. | Root or Nested Layout. |
+| **`loading.tsx`** | Suspense | Manual loading state or spinner. | Automatic Suspense boundary. |
+| **`error.tsx`** | Recovery | Error boundary for the segment. | Automatic Error boundary. |
+
+---
+
+## 3. The Data Prefix Taxonomy (`/data`)
+
+The `/data` folder uses a strict prefixing convention to separate system config from user data and page content.
+
+### A. The `app-*` Prefix (System Infrastructure)
+These files contain global constants that dictate system behavior.
+- **Purpose**: Routing tables, global configurations, legal term manifests.
+- **Example**: `app-routes.ts`, `app-configs.ts`.
+- **Rule**: Changing these usually affects the entire application structure.
+
+### B. The `user-*` Prefix (User Relations)
+These files simulate "Join Tables" or activity logs specific to individuals.
+- **Purpose**: Mapping users to read notifications, accepted terms, or custom preferences.
+- **Example**: `user-notifications.ts`, `user-terms.ts`.
+- **Rule**: Must contain a `userId` property and be consumed via `createUserScopedService`.
+
+### C. The `page-*` Prefix (Content/CMS)
+These files act as a flat-file CMS to decouple UI strings from component logic.
+- **Purpose**: Hero text, feature lists, pricing labels, and descriptive copy.
+- **Example**: `page-landing.ts`, `page-admin-dashboard.ts`.
+- **Rule**: Components should import these to keep the JSX clean and translation-ready.
+
+---
+
+## 4. Directory Tree
 
 ```text
 /
-├── app/                        # UI Source (React Components)
-│   ├── (public)/               # Publicly accessible routes
-│   ├── (admin)/                # Protected dashboard routes
-│   ├── (auth)/                 # Login/Signup flows
-│   └── ui/                     # Global shared UI (Atomic: Button, Card)
+├── app/                        # Next.js App Router Structure
+│   ├── (public)/               # Route Group: Public facing pages
+│   │   ├── layout.tsx          # Public Nav + Footer
+│   │   └── page.tsx            # Route: /
+│   ├── (admin)/                # Route Group: Dashboard features
+│   │   ├── layout.tsx          # Admin Sidebar + Header
+│   │   ├── dashboard/          
+│   │   │   ├── blog/       
+│   │   │   │   └── page.tsx    # Route: /dashboard/projects
+│   │   │   └── users/
+│   │   │       ├── page.tsx    # Route: /dashboard/users
+│   │   │       └── ui/         # Co-located UI for Users page
+│   └── ui/                     # Global Atomic UI (Button, Input)
 │
-├── service/                    # Business Logic (THE API LAYER)
-│   ├── index.ts                # Global Service Registry & Factories
-│   ├── provider.ts             # Data Provider Strategy (Mock/Real)
-│   ├── [domain].ts             # Feature services (UserService, etc)
-│   └── strategy-*.ts           # Data strategies (Memory, Strapi)
+├── plugins/                    # Modular Pods (Self-contained)
+│   └── [plugin-name]/
+│       ├── index.ts            # Public API (Entry Point)
+│       ├── data.ts             # Types (IPrefix) & Seeds
+│       ├── service.ts          # Logic & Data Registration
+│       └── ui/                 # Feature-specific components
 │
-├── data/                       # Data Definitions & Static Content
-│   ├── _types.ts               # Global system types
-│   ├── app-*.ts                # System config & constants
-│   ├── page-*.ts               # CMS-style flat content for pages
-│   └── [domain].ts             # Types & initial mock records
-│
-├── config/                     # System Configuration
-│   └── service.ts              # THE MASTER SWITCH (Strategy selection)
-│
-├── lib/                        # Utility functions & AI logic
-└── docs/                       # Architectural Manifests
+├── service/                    # Global Business Logic
+└── data/                       # Mock DB & CMS Manifests
 ```
 
 ---
-
-## 3. Naming Conventions & Etiquette
-
-To maintain a clean and searchable codebase, we adhere to strict naming patterns:
-
-### A. Interface Naming
-All interfaces **MUST** be prefixed with a capital `I`.
-- **Correct**: `interface IUser`, `interface IAppConfig`.
-- **Incorrect**: `interface User`, `interface AppConfig`.
-
-### B. Bitwise Flags
-Any enum or number used for bitwise permissions or state toggles **MUST** end with the word `Flags`.
-- **Correct**: `enum UserStatusFlags`, `enum AppRouteFlags`.
-- **Incorrect**: `enum UserStatus`, `enum RoutePermissions`.
-
-### C. Service Exports
-Services should be exported as a named constant following the `[Domain]Service` pattern.
-- **Correct**: `export const ProjectService = ...`
-- **Incorrect**: `export default createService(...)`
-
----
-
-## 4. Modularity: Adding a New Domain
-
-The framework uses a **"Three-Point-Touch"** system for adding features. If you want to add "Tasks":
-
-### Step 1: Data Definition (`data/tasks.ts`)
-Define the shape and initial state.
-```typescript
-export interface ITask {
-  id: string;
-  title: string;
-  flags: TaskStatusFlags;
-}
-
-export enum TaskStatusFlags {
-  None = 0,
-  IsCompleted = 1 << 0,
-  IsArchived = 1 << 1,
-}
-
-export const DATA: ITask[] = [{ id: 't1', title: 'Setup Framework', flags: TaskStatusFlags.IsCompleted }];
-```
-
-### Step 2: Service Orchestration (`service/tasks.ts`)
-Create the CRUD bridge and register seeds.
-```typescript
-import { DATA, ITask } from '../data/tasks.ts';
-import { createService, registerInitialData } from './index.ts';
-
-const COLLECTION = 'tasks';
-registerInitialData(COLLECTION, DATA); // Deferred seeding
-
-export const TaskService = createService<ITask>(COLLECTION);
-```
-
-### Step 3: UI Implementation (`app/dashboard/tasks/page.tsx`)
-Consume the service safely.
-```typescript
-const fetchTasks = async () => {
-  const res = await TaskService.findAll();
-  if (res.data) setTasks(res.data);
-};
-```
-
----
-
-## 5. The "Ten Commandments" of Code Etiquette
-
-1.  **Thou Shalt Not Fetch in Components**: All network logic must be abstracted into a Service.
-2.  **No Naked Arrays**: Always wrap API returns in `IApiResponse<T>` to handle status and errors gracefully.
-3.  **Default to Memory**: Always develop new features using the `MemoryStrategy` first to ensure the UI is perfect before the API exists.
-4.  **Use registerInitialData**: Never manually populate state in a service; use the registration system to support deferred seeding.
-5.  **Bitwise over Booleans**: For multi-state entities, use `Flags` instead of multiple boolean flags (e.g., `status: UserStatusFlags` vs `isActive: boolean, isPending: boolean`).
-6.  **Registry-First**: Use the `Services` registry in `service/index.ts` to ensure singleton instances.
-7.  **Deferred Initialization**: Ensure `bootstrapProvider()` is the first thing called in `index.tsx`.
-8.  **Atomic UI**: Components in `app/ui` must be stateless and highly reusable.
-9.  **Domain Isolation**: `UserService` should never directly modify `TaskService` data; it should interact via the public API.
-10. **Standardized Responses**: Every service method MUST return a Promise of `IApiResponse`.
-
----
-
-## 6. Data Flow Rules
-
-1.  **Top-Down Execution**: `data` (Definition) -> `service` (Logic) -> `app` (View).
-2.  **Single Source of Truth**: The `MEMORY_REGISTRY` is the global state for the local strategy.
-3.  **Backend Agnosticism**: Switching the strategy in `config/service.ts` must never require a change to the UI layer.
-
-*OpenDND Framework - Architecture for Longevity.*
+*OpenDND Framework - Built for the Future, Ready for Next.js.*
