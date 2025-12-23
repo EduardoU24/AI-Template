@@ -1,24 +1,26 @@
-export type TermType = 'terms_of_service' | 'privacy_policy' | 'cookie_policy' | 'eula';
+import { createService } from './service'
 
-export interface AppTerm {
-  id: string;
-  type: TermType;
-  version: string;
-  title: string;
-  content: string; // Markdown or HTML string
-  summary: string; // AI generated summary placeholder
-  createdAt: string; // ISO Date (Replacing effectiveDate)
-  updatedAt: string; // ISO Date
-  flags: AppTermFlags;
-  changelog?: string;
-}
+export type TermType = 'terms_of_service' | 'privacy_policy' | 'cookie_policy' | 'eula';
 
 export enum AppTermFlags {
   None = 0,
   IsActive = 1 << 0,
 }
 
-export const APP_TERMS: AppTerm[] = [
+export interface IAppTerm {
+  id: string;
+  type: TermType;
+  version: string;
+  title: string;
+  content: string;
+  summary: string;
+  createdAt: string;
+  updatedAt: string;
+  flags: AppTermFlags;
+  changelog?: string;
+}
+
+export const DATA: IAppTerm[] = [
   {
     id: 'term_tos_v1.0',
     type: 'terms_of_service',
@@ -54,3 +56,13 @@ export const APP_TERMS: AppTerm[] = [
     flags: AppTermFlags.IsActive
   }
 ];
+
+export const AppTermService = {
+  ...createService<IAppTerm>('terms'),
+  getLatestByType: async (type: TermType) => {
+    const res = await createService<IAppTerm>('terms').findAll();
+    const matches = (res.data || []).filter(t => t.type === type && (t.flags & AppTermFlags.IsActive) !== 0);
+    const sorted = matches.sort((a, b) => b.version.localeCompare(a.version));
+    return { ...res, data: sorted[0] || null };
+  }
+};

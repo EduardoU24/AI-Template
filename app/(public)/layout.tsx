@@ -1,8 +1,7 @@
-import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { Terminal, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
-import { APP_ROUTES, AppRouteFlags } from '../../data/app-routes';
+import { DATA as APP_ROUTES, AppRouteFlags } from '../../data/app-routes';
 
 export default function PublicLayout() {
   const navbarRoutes = APP_ROUTES.filter(r => (r.flags & AppRouteFlags.ShowInNavbar) !== 0);

@@ -1,15 +1,21 @@
-import { MOCK_DB, MockDatabase } from './_mockup.data';
+import { MOCK_DB } from './_mockup.data.ts';
+import { IApiResponse } from './_types.ts';
 
-export interface ApiResponse<T> {
-  data: T | null;
-  error?: string;
-  status: number;
-  meta?: {
-    page?: number;
-    total?: number;
-    timestamp: string;
-    affected?: number;
-  };
+import { IUser, IUserExtended } from './users'
+import { IAppConfig } from './app-configs'
+import { IAppTerm } from './app-terms'
+import { AppRoute } from './app-routes'
+import { UserTermAcceptance } from './user-terms'
+import { UserNotificationRecord } from './user-notifications'
+
+// Mock Database Structure
+export interface IMockDatabase {
+  configs: IAppConfig[];
+  terms: IAppTerm[];
+  users: IUserExtended[];
+  userTerms: UserTermAcceptance[];
+  routes: AppRoute[];
+  notifications: UserNotificationRecord[];
 }
 
 interface RequestOptions {
@@ -29,11 +35,11 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * Simulates the server processing a request
  */
 export const mockApi = {
-  get: async <K extends keyof MockDatabase>(
+  get: async <K extends keyof IMockDatabase>(
     collection: K, 
-    filterFn?: (item: MockDatabase[K][number]) => boolean,
+    filterFn?: (item: IMockDatabase[K][number]) => boolean,
     options: RequestOptions = {}
-  ): Promise<ApiResponse<MockDatabase[K]>> => {
+  ): Promise<IApiResponse<IMockDatabase[K]>> => {
     
     await wait(options.delay ?? DEFAULT_LATENCY);
 
@@ -46,7 +52,7 @@ export const mockApi = {
     const filteredItems = filterFn ? allItems.filter(filterFn) : allItems;
 
     return {
-      data: filteredItems as MockDatabase[K],
+      data: filteredItems as IMockDatabase[K],
       status: 200,
       meta: {
         total: filteredItems.length,
@@ -55,11 +61,11 @@ export const mockApi = {
     };
   },
 
-  post: async <K extends keyof MockDatabase>(
+  post: async <K extends keyof IMockDatabase>(
     collection: K,
-    item: MockDatabase[K][number],
+    item: IMockDatabase[K][number],
     options: RequestOptions = {}
-  ): Promise<ApiResponse<MockDatabase[K][number]>> => {
+  ): Promise<IApiResponse<IMockDatabase[K][number]>> => {
     
     await wait(options.delay ?? DEFAULT_LATENCY);
     if (options.shouldFail) return { data: null, error: 'Error', status: 500 };
@@ -73,13 +79,13 @@ export const mockApi = {
     };
   },
 
-  put: async <K extends keyof MockDatabase>(
+  put: async <K extends keyof IMockDatabase>(
     collection: K,
     id: string,
-    updates: Partial<MockDatabase[K][number]>,
-    filterFn?: (item: MockDatabase[K][number]) => boolean, // Optional security check (e.g. ownership)
+    updates: Partial<IMockDatabase[K][number]>,
+    filterFn?: (item: IMockDatabase[K][number]) => boolean, // Optional security check (e.g. ownership)
     options: RequestOptions = {}
-  ): Promise<ApiResponse<MockDatabase[K][number]>> => {
+  ): Promise<IApiResponse<IMockDatabase[K][number]>> => {
     
     await wait(options.delay ?? DEFAULT_LATENCY);
     if (options.shouldFail) return { data: null, error: 'Error', status: 500 };
@@ -110,12 +116,12 @@ export const mockApi = {
     };
   },
 
-  delete: async <K extends keyof MockDatabase>(
+  delete: async <K extends keyof IMockDatabase>(
     collection: K,
     id: string,
-    filterFn?: (item: MockDatabase[K][number]) => boolean, // Optional security check
+    filterFn?: (item: IMockDatabase[K][number]) => boolean, // Optional security check
     options: RequestOptions = {}
-  ): Promise<ApiResponse<boolean>> => {
+  ): Promise<IApiResponse<boolean>> => {
     
     await wait(options.delay ?? DEFAULT_LATENCY);
     if (options.shouldFail) return { data: null, error: 'Error', status: 500 };

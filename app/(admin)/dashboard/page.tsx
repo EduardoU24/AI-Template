@@ -5,16 +5,16 @@ import {
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
-import { Button } from '../../ui/button';
-import { Card } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { INITIAL_STATS, MOCK_LOGS, delay } from '../../../data/mock-dashboard';
-import { MockStats, ActivityLog } from '../../types';
-import { generateDashboardInsight } from '../../lib/ai';
-import { DASHBOARD_PAGE_CONTENT } from '../../../data/page-admin-dashboard';
+import { Button } from '../../ui/button.tsx';
+import { Card } from '../../ui/card.tsx';
+import { Badge } from '../../ui/badge.tsx';
+import { INITIAL_STATS, MOCK_LOGS, delay } from '../../../data/mock-dashboard.ts';
+import { MockStats } from '../../../data/mock-dashboard';
+import { IActivityLog } from '../../../data/_types';
+import { generateDashboardInsight } from '../../lib/ai.ts';
+import { DASHBOARD_PAGE_CONTENT } from '../../../data/page-admin-dashboard.ts';
 
 // --- INLINE COMPONENT: StatCard ---
-// Inlined to resolve module resolution issues with relative imports
 interface StatCardProps { 
   title: string; 
   value: string | number; 
@@ -61,14 +61,12 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, onGenera
     </div>
   </Card>
 );
-// --- END INLINE COMPONENT ---
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<MockStats>(INITIAL_STATS);
   const [logs, setLogs] = useState<ActivityLog[]>(MOCK_LOGS);
   const [loading, setLoading] = useState(false);
   
-  // AI Insight states
   const [insights, setInsights] = useState<Record<string, string>>({});
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({});
 
@@ -76,7 +74,7 @@ export default function DashboardPage() {
 
   const refreshData = async () => {
     setLoading(true);
-    await delay(800); // Simulate network
+    await delay(800);
     setStats(prev => ({
       ...prev,
       activeUsers: prev.activeUsers + Math.floor(Math.random() * 100) - 30,
@@ -92,7 +90,6 @@ export default function DashboardPage() {
     setLoadingInsights(prev => ({ ...prev, [key]: false }));
   };
 
-  // Mock chart data
   const chartData = [
     { name: 'Mon', users: 4000, rev: 2400 },
     { name: 'Tue', users: 3000, rev: 1398 },
@@ -116,7 +113,6 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard 
           title={statLabels.revenue.label} 
@@ -157,7 +153,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Main Chart */}
         <Card className="lg:col-span-2 min-h-[400px] flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-white">{charts.revenue.title}</h2>
@@ -188,7 +183,6 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        {/* Activity Feed */}
         <Card className="flex flex-col">
           <h2 className="text-lg font-semibold text-white mb-6">{charts.activity.title}</h2>
           <div className="space-y-6 flex-1 overflow-y-auto max-h-[320px] pr-2">

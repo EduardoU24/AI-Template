@@ -1,37 +1,38 @@
+import { IUser } from './users'
 
-export interface GenericMedia {
-    id: number | string;
-    url: string;
-    alternativeText?: string;
-    caption?: string;
-    width?: number;
-    height?: number;
-    formats?: {
-        thumbnail?: { url: string };
-        small?: { url: string };
-        medium?: { url: string };
-        large?: { url: string };
-    };
-    mime?: string;
+export interface IApiResponse<T> {
+  data: T | null;
+  error?: string;
+  status: number;
+  meta?: {
+    page?: number;
+    total?: number;
+    timestamp: string;
+    affected?: number;
+  };
 }
 
-export interface GenericSeo {
-  title: string
-  description: string
-  keywords?: string[]
-  canonicalUrl?: string
-  robots?: string
-  og?: {
-      title?: string
-      description?: string
-      image?: GenericMedia
-      type?: 'website' | 'article' | 'profile'
-      locale?: string
-  }
-  twitter?: {
-      card?: 'summary' | 'summary_large_image'
-      site?: string // e.g. @opendnd
-      creator?: string
-  }
-  structuredData?: Record<string, any>
+// UI & System Types
+export interface IAuthState {
+  isAuthenticated: boolean;
+  user: IUser | null;
+  isLoading: boolean;
+}
+
+export interface IActivityLog {
+  id: string;
+  action: string;
+  createdAt: string; 
+  status: 'success' | 'warning' | 'error';
+}
+
+export enum ThemeMode {
+  LIGHT = 'light',
+  DARK = 'dark'
+}
+
+export interface IDebugConfig {
+  mockLatency: number;
+  showGrid: boolean;
+  forceError: boolean;
 }

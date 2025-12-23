@@ -4,7 +4,7 @@ import {
   BarChart3, Users, DollarSign, BrainCircuit, LayoutDashboard, Settings
 } from 'lucide-react';
 import { Button } from '../ui/button';
-import { APP_ROUTES, AppRouteFlags } from '../../data/app-routes';
+import { DATA as APP_ROUTES, AppRouteFlags } from '../../data/app-routes';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 
 const ICON_MAP: Record<string, any> = {

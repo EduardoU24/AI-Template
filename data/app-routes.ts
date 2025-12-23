@@ -1,11 +1,10 @@
-
 export enum AppRouteFlags {
   None = 0,
-  RequiresAuth = 1 << 0,  // Only accessible if logged in
-  GuestOnly = 1 << 1,     // Only accessible if logged out (e.g. Login)
-  ShowInSidebar = 1 << 2, // Visible in Dashboard Sidebar
-  ShowInNavbar = 1 << 3,  // Visible in Landing Navbar
-  IsAdmin = 1 << 4        // Admin only route
+  RequiresAuth = 1 << 0,
+  GuestOnly = 1 << 1,
+  ShowInSidebar = 1 << 2,
+  ShowInNavbar = 1 << 3,
+  IsAdmin = 1 << 4
 }
 
 export interface AppRoute {
@@ -13,13 +12,16 @@ export interface AppRoute {
   path: string;
   componentKey: 'Landing' | 'Dashboard' | 'Login';
   label: string;
-  icon?: string; // Icon name from lucide-react stringified
+  icon?: string;
   flags: AppRouteFlags;
   createdAt: string;
   updatedAt: string;
 }
 
-export const APP_ROUTES: AppRoute[] = [
+import { createService } from './service';
+export const AppRouteService = createService<AppRoute>('routes');
+
+export const DATA: AppRoute[] = [
   {
     id: 'route_home',
     path: '/',
@@ -50,8 +52,8 @@ export const APP_ROUTES: AppRoute[] = [
   },
   {
     id: 'route_dash_users',
-    path: '/dashboard/users', // Note: Nested routes handled by component logic or flat mapped
-    componentKey: 'Dashboard', // Placeholder: In real app, separate component
+    path: '/dashboard/users',
+    componentKey: 'Dashboard',
     label: 'Users',
     icon: 'Users',
     flags: AppRouteFlags.RequiresAuth | AppRouteFlags.ShowInSidebar | AppRouteFlags.IsAdmin,

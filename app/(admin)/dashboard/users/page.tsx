@@ -1,22 +1,24 @@
+
 import React, { useEffect, useState } from 'react';
 import { Edit2, Trash2, Plus, User as UserIcon, Check, X, Shield, ShieldAlert } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { Card } from '../../../ui/card';
 import { Badge } from '../../../ui/badge';
 import { UserService } from '../../../../data/_mockup.service';
-import { UserExtended, UserRole, UserStatus } from '../../../../data/users';
+import { IUserExtended, UserRoleType, UserStatusFlags } from '../../../../data/users';
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<UserExtended[]>([]);
+  const [users, setUsers] = useState<IUserExtended[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   
   // Quick Edit State
-  const [editForm, setEditForm] = useState<Partial<UserExtended>>({});
+  const [editForm, setEditForm] = useState<Partial<IUserExtended>>({});
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    const res = await UserService.getAll();
+    // Fix: Using findAll instead of getAll as defined in createService (line 19)
+    const res = await UserService.findAll();
     if (res.data) setUsers(res.data);
     setIsLoading(false);
   };
@@ -25,7 +27,7 @@ export default function UsersPage() {
     fetchUsers();
   }, []);
 
-  const handleEdit = (user: UserExtended) => {
+  const handleEdit = (user: IUserExtended) => {
     setEditingId(user.id);
     setEditForm(user);
   };
@@ -37,7 +39,7 @@ export default function UsersPage() {
 
   const handleSave = async (id: string) => {
     // Optimistic Update
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, ...editForm } as UserExtended : u));
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, ...editForm } as IUserExtended : u));
     setEditingId(null);
     
     // API Call
@@ -50,10 +52,10 @@ export default function UsersPage() {
     await UserService.delete(id);
   };
 
-  const getStatusColor = (status: UserStatus) => {
-    if (status & UserStatus.Active) return 'bg-green-500/10 text-green-400';
-    if (status & UserStatus.Suspended) return 'bg-red-500/10 text-red-400';
-    if (status & UserStatus.Pending) return 'bg-yellow-500/10 text-yellow-400';
+  const getStatusColor = (status: UserStatusFlags) => {
+    if (status & UserStatusFlags.Active) return 'bg-green-500/10 text-green-400';
+    if (status & UserStatusFlags.Suspended) return 'bg-red-500/10 text-red-400';
+    if (status & UserStatusFlags.Pending) return 'bg-yellow-500/10 text-yellow-400';
     return 'bg-slate-700 text-slate-400';
   };
 
@@ -107,15 +109,15 @@ export default function UsersPage() {
                   </td>
                   <td className="p-4">
                      <div className="flex gap-1">
-                        {(user.role & UserRole.Admin) ? <Badge color="bg-purple-500/10 text-purple-400">Admin</Badge> : null}
-                        {(user.role & UserRole.User) ? <Badge color="bg-blue-500/10 text-blue-400">User</Badge> : null}
-                        {(user.role & UserRole.Guest) ? <Badge>Guest</Badge> : null}
+                        {(user.role & UserRoleType.Admin) ? <Badge color="bg-purple-500/10 text-purple-400">Admin</Badge> : null}
+                        {(user.role & UserRoleType.User) ? <Badge color="bg-blue-500/10 text-blue-400">User</Badge> : null}
+                        {(user.role & UserRoleType.Guest) ? <Badge>Guest</Badge> : null}
                      </div>
                   </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                      {(user.status & UserStatus.Active) ? "Active" : 
-                       (user.status & UserStatus.Suspended) ? "Suspended" : "Pending"}
+                      {(user.status & UserStatusFlags.Active) ? "Active" : 
+                       (user.status & UserStatusFlags.Suspended) ? "Suspended" : "Pending"}
                     </span>
                   </td>
                   <td className="p-4 text-sm text-slate-400">
