@@ -19,13 +19,6 @@ export interface IAuthState {
   isLoading: boolean;
 }
 
-export interface IActivityLog {
-  id: string;
-  action: string;
-  createdAt: string; 
-  status: 'success' | 'warning' | 'error';
-}
-
 export enum ThemeMode {
   LIGHT = 'light',
   DARK = 'dark'

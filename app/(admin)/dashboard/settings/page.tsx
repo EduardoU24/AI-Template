@@ -4,10 +4,12 @@ import { Button } from '../../../ui/button';
 import { Card } from '../../../ui/card';
 import { Input } from '../../../ui/input';
 import { AppConfigService } from '../../../../data/_mockup.service';
-import { AppConfig, AppConfigFlags } from '../../../../data/app-configs';
+// Fix: Using correct interface name IAppConfig as exported from data/app-configs.ts
+import { IAppConfig, AppConfigFlags } from '../../../../data/app-configs';
 
 export default function SettingsPage() {
-  const [config, setConfig] = useState<AppConfig | null>(null);
+  // Fix: Using correct interface name IAppConfig
+  const [config, setConfig] = useState<IAppConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
@@ -48,7 +50,8 @@ export default function SettingsPage() {
     if (formState.isPublic) newFlags |= AppConfigFlags.IsPublic;
     if (formState.inMaintenance) newFlags |= AppConfigFlags.InMaintenance;
 
-    const updates: Partial<AppConfig> = {
+    // Fix: Using correct interface name IAppConfig for Partial type
+    const updates: Partial<IAppConfig> = {
       baseSeo: {
         ...config.baseSeo,
         title: formState.seoTitle,

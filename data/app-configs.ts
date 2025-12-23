@@ -1,3 +1,4 @@
+
 import { IGenericMedia, IGenericSeo } from './pages.ts'
 import { DATA as ALL_ROUTES, AppRoute } from './app-routes.ts'
 
@@ -15,6 +16,10 @@ export interface IAppConfig {
   flags: AppConfigFlags;
 }
 
+/**
+ * Configuration data must be defined before service instantiation
+ * to satisfy the circular database dependencies.
+ */
 export const DATA: IAppConfig = {
   id: 'global_config_1',
   key: 'global',
@@ -37,7 +42,8 @@ export const DATA: IAppConfig = {
   flags: AppConfigFlags.None,
 };
 
-import { createService } from './service'
+import { createService } from './service/index.ts'
+
 export const AppConfigService = {
   ...createService<IAppConfig>('configs'),
   getByKey: (key: string) => createService<IAppConfig>('configs').find(c => c.key === key)

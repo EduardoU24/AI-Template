@@ -8,10 +8,8 @@ import {
 import { Button } from '../../ui/button.tsx';
 import { Card } from '../../ui/card.tsx';
 import { Badge } from '../../ui/badge.tsx';
-import { INITIAL_STATS, MOCK_LOGS, delay } from '../../../data/mock-dashboard.ts';
-import { MockStats } from '../../../data/mock-dashboard';
-import { IActivityLog } from '../../../data/_types';
-import { generateDashboardInsight } from '../../lib/ai.ts';
+import { STATS, LOGS, IDasboardStats, IAppActivityLog } from '../../../data/app-dashboard';
+import { generateDashboardInsight } from '../../../lib/ai.ts';
 import { DASHBOARD_PAGE_CONTENT } from '../../../data/page-admin-dashboard.ts';
 
 // --- INLINE COMPONENT: StatCard ---
@@ -63,8 +61,8 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, onGenera
 );
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<MockStats>(INITIAL_STATS);
-  const [logs, setLogs] = useState<ActivityLog[]>(MOCK_LOGS);
+  const [stats, setStats] = useState<IDasboardStats>(STATS);
+  const [logs, setLogs] = useState<IAppActivityLog[]>(LOGS);
   const [loading, setLoading] = useState(false);
   
   const [insights, setInsights] = useState<Record<string, string>>({});
@@ -74,7 +72,6 @@ export default function DashboardPage() {
 
   const refreshData = async () => {
     setLoading(true);
-    await delay(800);
     setStats(prev => ({
       ...prev,
       activeUsers: prev.activeUsers + Math.floor(Math.random() * 100) - 30,

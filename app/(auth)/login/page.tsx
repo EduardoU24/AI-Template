@@ -4,7 +4,6 @@ import { Terminal, Github, Chrome } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Card } from '../../ui/card';
-import { delay } from '../../../data/mock-dashboard';
 import { MockSession } from '../../../data/_mockup.session';
 
 export default function LoginPage() {
@@ -14,8 +13,6 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate auth API call
-    await delay(1500); 
     MockSession.setSession('u_1'); // Set mock session
     setIsLoading(false);
     navigate('/dashboard');

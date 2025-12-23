@@ -1,3 +1,4 @@
+
 export interface IUser {
   id: string;
   name: string;
@@ -75,7 +76,7 @@ export const DATA: IUserExtended[] = [
   },
 ];
 
-import { createService } from './service';
+import { createService } from './service/index.ts';
 import { MockSession } from './_mockup.session.ts';
 
 export const UserService = {

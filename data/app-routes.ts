@@ -1,3 +1,4 @@
+
 export enum AppRouteFlags {
   None = 0,
   RequiresAuth = 1 << 0,
@@ -18,9 +19,10 @@ export interface AppRoute {
   updatedAt: string;
 }
 
-import { createService } from './service';
-export const AppRouteService = createService<AppRoute>('routes');
-
+/**
+ * RAW DATA Definition must come BEFORE imports that trigger the service chain
+ * to avoid Temporal Dead Zone (TDZ) ReferenceErrors.
+ */
 export const DATA: AppRoute[] = [
   {
     id: 'route_home',
@@ -91,3 +93,6 @@ export const DATA: AppRoute[] = [
     updatedAt: '2023-01-01T00:00:00Z'
   }
 ];
+
+import { createService } from './service/index.ts';
+export const AppRouteService = createService<AppRoute>('routes');
