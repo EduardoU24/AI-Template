@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
-import { Settings, X, Activity, Zap, Bug, Bell, FlaskConical } from 'lucide-react';
+import { Settings, X, Activity, Zap, Bug, Bell } from 'lucide-react';
 import { IDebugConfig } from '../../data/_types.ts';
 import { useNotification } from './notification-center.tsx';
-import { APP_NOTIFICATION_TEMPLATES } from '../../data/app-notifications.ts';
+import { DATA as NOTIFICATION_TEMPLATES, IAppNotificationFlags } from '../../data/app-notifications.ts';
 
 interface DebugOverlayProps {
   config: IDebugConfig;
@@ -14,17 +15,27 @@ export const DebugMenu: React.FC<DebugOverlayProps> = ({ config, onUpdate }) => 
   const { notify } = useNotification();
 
   const triggerTestNotification = (key: string) => {
-    const template = APP_NOTIFICATION_TEMPLATES[key];
+    let templateId = '';
+    
+    // Map debug keys to template IDs in data/app-notifications.ts
+    switch(key) {
+      case 'WELCOME': templateId = 'welcome_guest'; break;
+      case 'MAINTENANCE': templateId = 'maintenance'; break;
+      case 'ERROR_GENERIC': templateId = 'auth_required'; break; // Using auth_required as error demo
+      case 'GOAL_REACHED': templateId = 'celebration'; break;
+      default: return;
+    }
+
+    const template = NOTIFICATION_TEMPLATES.find(n => n.id === templateId);
+
     if (template) {
       notify({
         ...template,
-        type: template.type as any,
-        title: template.title!,
-        message: template.message!,
+        // Override actions for specific demo cases
         actions: key === 'WELCOME' ? [
           { label: 'View Settings', onClick: () => console.log('Redirect to settings...'), variant: 'primary' },
           { label: 'Dismiss', onClick: () => {}, variant: 'ghost' }
-        ] : undefined
+        ] : template.actions
       });
     }
   };
@@ -117,7 +128,7 @@ export const DebugMenu: React.FC<DebugOverlayProps> = ({ config, onUpdate }) => 
           </div>
           <button 
             onClick={() => notify({
-              type: 'success',
+              flags: IAppNotificationFlags.IsSuccess,
               title: 'Manual Success',
               message: 'Triggered directly from the lab.',
               duration: 3000

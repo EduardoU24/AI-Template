@@ -1,30 +1,37 @@
+
 # OpenDND Framework: Architectural Diagrams
 
 ## 1. Modular Dependency Graph
-The relationship between files in a **Plugin Pod** and their interaction with the core.
+The relationship between files in the architecture.
 
 ```mermaid
 graph RL
-    subgraph Plugin_Pod ["/plugins/projects"]
-        Data["data.ts (Types/Seeds)"]
-        Srv["service.ts (Logic)"]
-        UI["ui/ (Co-located Components)"]
-        Idx["index.ts (Public Export)"]
+    subgraph Data_Tier ["/data"]
+        Entities["[Entity].ts (Types/Seeds)"]
+        Configs["app-*.ts (Infrastructure)"]
+        Relations["user-*.ts (User Relations)"]
     end
 
-    subgraph Core_Services ["/service"]
+    subgraph Service_Layer ["/service"]
         Base["index.ts (CRUD Factory)"]
         Provider["provider.ts (Strategy Manager)"]
+        DomainSrv["[Domain].ts (Business Logic)"]
     end
 
     subgraph App_Router ["/app"]
-        Page["(admin)/dashboard/projects/page.tsx"]
+        Page["(admin)/dashboard/[feature]/page.tsx"]
+        UI["ui/ (Co-located Components)"]
     end
 
-    Srv -- "Registers Seeds" --> Base
-    Page -- "Consumes" --> Idx
-    Srv -- "Uses" --> Base
+    DomainSrv -- "Registers Seeds" --> Base
+    DomainSrv -- "Uses" --> Base
     Base -- "Requests" --> Provider
+    
+    Page -- "Consumes" --> DomainSrv
+    Page -- "Imports" --> UI
+    
+    DomainSrv -.-> Entities
+    DomainSrv -.-> Relations
 ```
 
 ## 2. Data Flow Architecture
@@ -33,16 +40,16 @@ How a user interaction reaches the data store.
 ```mermaid
 sequenceDiagram
     participant UI as App Component (page.tsx)
-    participant Srv as Plugin Service (service.ts)
+    participant Srv as Domain Service (service/[domain].ts)
     participant Core as Base Service (service/index.ts)
     participant Prov as Provider (strategy-memory.ts)
 
-    UI->>Srv: ProjectService.findAllMy()
+    UI->>Srv: UserService.findAllMy()
     Srv->>Core: base.findAll()
-    Core->>Prov: provider.get('projects')
+    Core->>Prov: provider.get('users')
     Prov-->>Core: { data: [...] }
     Core-->>Srv: { data: [...] }
-    Srv-->>UI: { data: [User's Projects] }
+    Srv-->>UI: { data: [User Records] }
 ```
 
 ---

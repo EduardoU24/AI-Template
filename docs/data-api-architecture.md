@@ -1,14 +1,20 @@
+
 # OpenDND Framework: Data & Service Architecture
 
 This document defines the standards for data management, service orchestration, and logical ownership within the OpenDND environment.
 
-## 1. Modular Expansion: Plugin Pods
-To avoid monolithic bloat, all domain features are implemented as **Plugins** in `/plugins/[name]`. This mirrors the "Local Package" pattern in enterprise monorepos.
+## 1. Centralized Service Architecture
+
+All domain logic is centralized in the `/service` directory, ensuring a clear separation of concerns between the UI and the Data Layer.
+
+### Core Structure
+- **Data Definitions**: Types and Mock seeds reside in `data/`.
+- **Business Logic**: CRUD operations and feature logic reside in `service/`.
+- **UI Components**: Visuals reside in `app/`.
 
 ### Isolation Rules
-- **Data**: Mock seeds in `data.ts` represent the future database schema.
-- **Service**: Business logic in `service.ts` will eventually become **Server Actions**.
-- **UI**: Feature-specific components live in `ui/`, separated from the core framework.
+- **No Direct Data Access**: UI components must never import `DATA` arrays directly. They must use the corresponding `Service`.
+- **Service Registry**: All services are exported via `service/index.ts` or their specific modules.
 
 ---
 

@@ -1,3 +1,4 @@
+
 # Layout & Folder Structure: Next.js Parity Standard
 
 This document defines the physical file structure and coding etiquette for the OpenDND Framework. We adopt a **Next.js App Router inspired architecture** to ensure modularity and a seamless migration path to a full Next.js framework.
@@ -6,8 +7,8 @@ This document defines the physical file structure and coding etiquette for the O
 
 1.  **Directory-Based Routing**: The folder hierarchy in `/app` directly maps to the URL path.
 2.  **Special File Conventions**: Specific filenames define roles within a route segment.
-3.  **Domain Co-location (Plugin Pods)**: Complex features live in `/plugins/[domain]`, keeping UI, Services, and Data together.
-4.  **Service Abstraction**: Components **never** import raw data; they always go through the `/service` layer.
+3.  **Service Abstraction**: Components **never** import raw data; they always go through the `/service` layer.
+4.  **Separation of Concerns**: Data definitions live in `/data`, Logic in `/service`, and UI in `/app`.
 
 ---
 
@@ -59,22 +60,22 @@ These files act as a flat-file CMS to decouple UI strings from component logic.
 │   ├── (admin)/                # Route Group: Dashboard features
 │   │   ├── layout.tsx          # Admin Sidebar + Header
 │   │   ├── dashboard/          
-│   │   │   ├── blog/       
-│   │   │   │   └── page.tsx    # Route: /dashboard/projects
+│   │   │   ├── page.tsx        # Route: /dashboard (Overview)
 │   │   │   └── users/
 │   │   │       ├── page.tsx    # Route: /dashboard/users
 │   │   │       └── ui/         # Co-located UI for Users page
 │   └── ui/                     # Global Atomic UI (Button, Input)
 │
-├── plugins/                    # Modular Pods (Self-contained)
-│   └── [plugin-name]/
-│       ├── index.ts            # Public API (Entry Point)
-│       ├── data.ts             # Types (IPrefix) & Seeds
-│       ├── service.ts          # Logic & Data Registration
-│       └── ui/                 # Feature-specific components
+├── service/                    # Global Business Logic & Service Factories
+│   ├── index.ts                # Base Service Classes
+│   ├── users.ts                # Domain Specific Services
+│   └── provider.ts             # Data Provider Strategies
 │
-├── service/                    # Global Business Logic
 └── data/                       # Mock DB & CMS Manifests
+    ├── app-*.ts                # Tier 1: Infrastructure
+    ├── user-*.ts               # Tier 2: Relational
+    ├── page-*.ts               # Tier 3: Content
+    └── [entity].ts             # Tier 4: Master Entities
 ```
 
 ---

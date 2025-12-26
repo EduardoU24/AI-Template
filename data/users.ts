@@ -15,6 +15,17 @@ export interface IUserExtended extends IUser {
   preferences: number;
 }
 
+export interface IUserOwnedTEntryTFlags<TEntry, TFlags> {
+  id: string;
+  userId: string; // user id
+  user: IUser;
+  entryId: string; // entry id of the owned collection, eg. map id for IUserOwnedT<IAppMap>
+  entry: TEntry; // entry reference
+  createdAt: string;
+  updatedAt: string;
+  flags: TFlags; // 
+}
+
 export enum UserRoleType {
   Guest = 0,
   User = 1,

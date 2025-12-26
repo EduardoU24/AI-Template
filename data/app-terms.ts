@@ -1,6 +1,7 @@
+
 export type TermType = 'terms_of_service' | 'privacy_policy' | 'cookie_policy' | 'eula';
 
-export enum AppTermFlags {
+export enum IAppTermFlags {
   None = 0,
   IsActive = 1 << 0,
 }
@@ -14,7 +15,7 @@ export interface IAppTerm {
   summary: string;
   createdAt: string;
   updatedAt: string;
-  flags: AppTermFlags;
+  flags: IAppTermFlags;
   changelog?: string;
 }
 
@@ -28,7 +29,7 @@ export const DATA: IAppTerm[] = [
     summary: 'Initial release of terms.',
     createdAt: '2023-01-01T00:00:00Z',
     updatedAt: '2023-01-01T00:00:00Z',
-    flags: AppTermFlags.None
+    flags: IAppTermFlags.None
   },
   {
     id: 'term_tos_v1.1',
@@ -39,7 +40,7 @@ export const DATA: IAppTerm[] = [
     summary: 'Updated to include AI usage guidelines.',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
-    flags: AppTermFlags.IsActive,
+    flags: IAppTermFlags.IsActive,
     changelog: 'Added section 3 regarding generative AI outputs.'
   },
   {
@@ -51,6 +52,6 @@ export const DATA: IAppTerm[] = [
     summary: 'Standard privacy policy.',
     createdAt: '2023-01-01T00:00:00Z',
     updatedAt: '2023-01-01T00:00:00Z',
-    flags: AppTermFlags.IsActive
+    flags: IAppTermFlags.IsActive
   }
 ];

@@ -1,48 +1,79 @@
-export type NotificationType = 'success' | 'warning' | 'error' | 'info' | 'celebration';
+export enum IAppNotificationFlags {
+  None = 0,
+  IsInfo = 1 << 0,
+  IsSuccess = 1 << 1,
+  IsWarning = 1 << 2,
+  IsError = 1 << 3,
+  IsCelebration = 1 << 4,
 
-export interface NotificationAction {
+  IsFromSystem = 1 << 5,
+  IsFromCron = 1 << 6,
+  IsFromUser = 1 << 7,
+  IsFromAction = 1 << 8,
+
+  HasDuration = 1 << 9,
+  IsPersistent = 1 << 10,
+}
+
+export interface IAppNotification {
+  id: string;
+  title: string;
+  message?: string;
+  icon?: string; 
+  duration?: number; // ms, default 5000
+  actions?: IAppNotificationAction[];
+  onClose?: (id: string) => void;
+  createdAt: string;
+  updatedAt: string;
+  flags: IAppNotificationFlags;
+}
+
+export interface IAppNotificationAction {
   label: string;
   onClick: () => void;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
 }
 
-export interface AppNotification {
-  id: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  icon?: string;
-  duration?: number;
-  actions?: NotificationAction[];
-  onClose?: () => void;
-  isRead?: boolean;
-}
-
-export const APP_NOTIFICATION_TEMPLATES: Record<string, Partial<AppNotification>> = {
-  WELCOME: {
-    type: 'info',
+export const DATA: IAppNotification[] = [
+  {
+    id: 'welcome_guest',
     title: 'Welcome to OpenDND',
     message: 'We are glad to have you back. Explore the new dashboard features.',
     icon: 'Terminal',
-    duration: 6000
+    duration: 8000,
+    flags: IAppNotificationFlags.IsInfo,
+    createdAt: '',
+    updatedAt: '',
   },
-  MAINTENANCE: {
-    type: 'warning',
-    title: 'Scheduled Maintenance',
-    message: 'System will be offline for 2 hours tonight starting at 12:00 AM UTC.',
-    icon: 'AlertTriangle'
+  {
+    id: 'auth_required',
+    title: 'Knowledge Restricted',
+    message: 'You must be authenticated to access the deeper archives of this realm.',
+    icon: 'Lock',
+    actions: [
+      { label: 'Sign In', onClick: () => console.log('Redirecting...'), variant: 'primary' }
+    ],
+    flags: IAppNotificationFlags.IsWarning,
+    createdAt: '',
+    updatedAt: '',
   },
-  ERROR_GENERIC: {
-    type: 'error',
-    title: 'System Error',
-    message: 'We encountered an issue processing your last request. Please try again.',
-    icon: 'XCircle'
+  {
+    id: 'maintenance',
+    title: 'Arcane Miscalculation',
+    message: 'The AI Forge failed to manifest your request. The arcane winds are chaotic today.',
+    icon: 'AlertTriangle',
+    flags: IAppNotificationFlags.IsWarning,
+    createdAt: '',
+    updatedAt: '',
   },
-  GOAL_REACHED: {
-    type: 'celebration',
+  {
+    id: 'celebration',
     title: 'Milestone Achieved!',
     message: 'Your team has surpassed the monthly revenue target by 15%.',
-    icon: 'Trophy',
-    duration: 8000
+    icon: 'Sparkles',
+    duration: 10000,
+    flags: IAppNotificationFlags.IsCelebration,
+    createdAt: '',
+    updatedAt: '',
   }
-};
+];

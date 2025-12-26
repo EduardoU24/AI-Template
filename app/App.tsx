@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DebugMenu } from './ui/debug-menu.tsx';
@@ -14,7 +15,6 @@ import AdminLayout from './(admin)/layout.tsx';
 import DashboardPage from './(admin)/dashboard/page.tsx';
 import UsersPage from './(admin)/dashboard/users/page.tsx';
 import SettingsPage from './(admin)/dashboard/settings/page.tsx';
-import ProjectsPage from './(admin)/dashboard/projects/page.tsx';
 
 const App: React.FC = () => {
   const [debugConfig, setDebugConfig] = useState<IDebugConfig>({
@@ -48,7 +48,6 @@ const App: React.FC = () => {
               </RouteGuard>
             }>
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/dashboard/projects" element={<ProjectsPage />} />
               <Route path="/dashboard/users" element={<UsersPage />} />
               <Route path="/dashboard/settings" element={<SettingsPage />} />
             </Route>
@@ -69,10 +68,12 @@ const App: React.FC = () => {
 const RouteGuard: React.FC<{ children: React.ReactNode, flags: number }> = ({ children, flags }) => {
   const isAuthenticated = !!SessionManager.getSession();
 
+  // Check Guest Only (e.g. Login page should not be accessible if logged in)
   if ((flags & AppRouteFlags.GuestOnly) !== 0 && isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
+  // Check Auth Required
   if ((flags & AppRouteFlags.RequiresAuth) !== 0 && !isAuthenticated) {
     return <Navigate to="/login" replace />;
   }

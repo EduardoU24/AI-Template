@@ -1,3 +1,4 @@
+
 export enum AppRouteFlags {
   None = 0,
   RequiresAuth = 1 << 0,
@@ -10,7 +11,7 @@ export enum AppRouteFlags {
 export interface IAppRoute {
   id: string;
   path: string;
-  componentKey: 'Landing' | 'Dashboard' | 'Login' | 'Projects' | 'Settings';
+  componentKey: string;
   label: string;
   icon?: string;
   flags: AppRouteFlags;
@@ -41,27 +42,17 @@ export const DATA: IAppRoute[] = [
     id: 'route_dashboard',
     path: '/dashboard',
     componentKey: 'Dashboard',
-    label: 'Dashboard',
+    label: 'Analytics',
     icon: 'LayoutDashboard',
-    flags: AppRouteFlags.RequiresAuth | AppRouteFlags.ShowInNavbar | AppRouteFlags.ShowInSidebar,
+    flags: AppRouteFlags.RequiresAuth | AppRouteFlags.ShowInSidebar,
     createdAt: '2023-01-01T00:00:00Z',
     updatedAt: '2023-01-01T00:00:00Z'
-  },
-  {
-    id: 'route_dash_projects',
-    path: '/dashboard/projects',
-    componentKey: 'Projects',
-    label: 'Projects',
-    icon: 'Briefcase',
-    flags: AppRouteFlags.RequiresAuth | AppRouteFlags.ShowInSidebar,
-    createdAt: '2024-03-20T00:00:00Z',
-    updatedAt: '2024-03-20T00:00:00Z'
   },
   {
     id: 'route_dash_users',
     path: '/dashboard/users',
     componentKey: 'Dashboard',
-    label: 'Users',
+    label: 'User Base',
     icon: 'Users',
     flags: AppRouteFlags.RequiresAuth | AppRouteFlags.ShowInSidebar | AppRouteFlags.IsAdmin,
     createdAt: '2023-01-01T00:00:00Z',
@@ -71,7 +62,7 @@ export const DATA: IAppRoute[] = [
     id: 'route_dash_settings',
     path: '/dashboard/settings',
     componentKey: 'Settings',
-    label: 'Settings',
+    label: 'System Config',
     icon: 'Settings',
     flags: AppRouteFlags.RequiresAuth | AppRouteFlags.ShowInSidebar | AppRouteFlags.IsAdmin,
     createdAt: '2023-01-01T00:00:00Z',
